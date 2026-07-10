@@ -3,6 +3,9 @@ import 'package:provider/provider.dart';
 import '../providers/competidor_provider.dart';
 import '../providers/cronometro_provider.dart';
 import '../widgets/display_tiempo.dart';
+import '../widgets/boton_penalizacion.dart';
+
+class CronometroScreen extends StatefulWidget {
 
 class CronometroScreen extends StatefulWidget {
   const CronometroScreen({super.key});
@@ -101,78 +104,141 @@ class _CronometroScreenState extends State<CronometroScreen> with WidgetsBinding
         title: const Text('Cronómetro'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // Cabecera Competidor
-          Text(
-            'Dorsal: ${activeComp.dorsal}',
-            style: const TextStyle(fontSize: 20),
-          ),
-          Text(
-            activeComp.nombre,
-            style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 48),
+      body: SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const SizedBox(height: 40),
+            // Cabecera Competidor
+            Text(
+              'Dorsal: ${activeComp.dorsal}',
+              style: const TextStyle(fontSize: 20),
+            ),
+            Text(
+              activeComp.nombre,
+              style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 48),
 
-          // Display del Tiempo
-          DisplayTiempo(duration: cronoProv.tiempoTranscurrido),
+            // Display del Tiempo
+            DisplayTiempo(duration: cronoProv.tiempoTranscurrido),
 
-          const SizedBox(height: 48),
+            const SizedBox(height: 24),
 
-          // Controles
-          Wrap(
-            spacing: 20,
-            runSpacing: 20,
-            alignment: WrapAlignment.center,
-            children: [
-              // Botón Iniciar
-              if (!cronoProv.enMarcha)
-                ElevatedButton.icon(
-                  onPressed: () => cronoProv.iniciar(),
-                  icon: const Icon(Icons.play_arrow),
-                  label: const Text('Iniciar'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
-                    foregroundColor: Colors.white,
-                  ),
-                ),
-
-              // Botón Pausar / Reanudar
-              if (cronoProv.enMarcha)
-                ElevatedButton.icon(
-                  onPressed: () {
-                    if (cronoProv.pausado) {
-                      cronoProv.reanudar();
-                    } else {
-                      cronoProv.pausar();
-                    }
-                  },
-                  icon: Icon(cronoProv.pausado ? Icons.play_arrow : Icons.pause),
-                  label: Text(cronoProv.pausado ? 'Reanudar' : 'Pausar'),
-                ),
-
-              // Botón Detener
-              if (cronoProv.enMarcha)
-                ElevatedButton.icon(
-                  onPressed: () => _confirmarGuardado(context, compProv, cronoProv),
-                  icon: const Icon(Icons.stop),
-                  label: const Text('Detener'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red,
-                    foregroundColor: Colors.white,
-                  ),
-                ),
-
-              // Botón Reset
-              ElevatedButton.icon(
-                onPressed: (!cronoProv.enMarcha) ? () => cronoProv.reset() : null,
-                icon: const Icon(Icons.refresh),
-                label: const Text('Reset'),
+            // Contador de Penalizaciones
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surfaceVariant,
+                borderRadius: BorderRadius.circular(20),
               ),
-            ],
-          ),
-        ],
+              child: Text(
+                'Toques: ${activeComp.toques} | Postes: ${activeComp.postes}',
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+              ),
+            ),
+            const SizedBox(height: 32),
+
+            // Botones de Penalización
+            Wrap(
+              spacing: 20,
+              runSpacing: 20,
+              alignment: WrapAlignment.center,
+              children: [
+                BotonPenalizacion(
+                  label: 'Toque +2s',
+                  color: Colors.orange.shade700,
+                  onPressed: () => compProv.agregarToque(),
+                ),
+                BotonPenalizacion(
+                  label: 'Poste +50s',
+                  color: Colors.red.shade700,
+                  onPressed: () => compProv.agregarPoste(),
+                ),
+                SizedBox(
+                  width: 160,
+                  height: 60,
+                  child: FilledButton.icon(
+                    onPressed: compProv.historialPenalizaciones.isEmpty
+                        ? null
+                        : () => compProv.deshacerUltimaPenalizacion(),
+                    icon: const Icon(Icons.undo),
+                    label: const Text('Deshacer'),
+                  ),
+                ),
+                SizedBox(
+                  width: 160,
+                  height: 60,
+                  child: TextButton.icon(
+                    onPressed: () {
+                      compProv.resetPenalizaciones();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Penalizaciones reiniciadas')),
+                      );
+                    },
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('Reset Penalizaciones'),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 48),
+
+            // Controles del Cronómetro
+            Wrap(
+              spacing: 20,
+              runSpacing: 20,
+              alignment: WrapAlignment.center,
+              children: [
+                // Botón Iniciar
+                if (!cronoProv.enMarcha)
+                  ElevatedButton.icon(
+                    onPressed: () => cronoProv.iniciar(),
+                    icon: const Icon(Icons.play_arrow),
+                    label: const Text('Iniciar'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      foregroundColor: Colors.white,
+                    ),
+                  ),
+
+                // Botón Pausar / Reanudar
+                if (cronoProv.enMarcha)
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      if (cronoProv.pausado) {
+                        cronoProv.reanudar();
+                      } else {
+                        cronoProv.pausar();
+                      }
+                    },
+                    icon: Icon(cronoProv.pausado ? Icons.play_arrow : Icons.pause),
+                    label: Text(cronoProv.pausado ? 'Reanudar' : 'Pausar'),
+                  ),
+
+                // Botón Detener
+                if (cronoProv.enMarcha)
+                  ElevatedButton.icon(
+                    onPressed: () => _confirmarGuardado(context, compProv, cronoProv),
+                    icon: const Icon(Icons.stop),
+                    label: const Text('Detener'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      foregroundColor: Colors.white,
+                    ),
+                  ),
+
+                // Botón Reset
+                ElevatedButton.icon(
+                  onPressed: (!cronoProv.enMarcha) ? () => cronoProv.reset() : null,
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Reset'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 60),
+          ],
+        ),
       ),
     );
   }

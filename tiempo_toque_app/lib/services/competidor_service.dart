@@ -37,4 +37,13 @@ class CompetidorService {
       await competidor.save();
     }
   }
+
+  Future<void> actualizarPenalizaciones(int dorsal, int toques, int postes) async {
+    final competidor = _box.get(dorsal);
+    if (competidor != null) {
+      competidor.toques = toques;
+      competidor.postes = postes;
+      await competidor.save();
+    }
+  }
 }

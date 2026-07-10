@@ -3,13 +3,18 @@ import '../models/competidor.dart';
 import '../services/competidor_service.dart';
 
 class CompetidorProvider with ChangeNotifier {
-  final CompetidorService _service = CompetidorService();
+  final CompetidorService _service;
+
+  CompetidorProvider({CompetidorService? service})
+      : _service = service ?? CompetidorService();
 
   List<Competidor> _competidores = [];
   Competidor? _competidorActivo;
+  final List<String> _historialPenalizaciones = [];
 
   List<Competidor> get competidores => _competidores;
   Competidor? get competidorActivo => _competidorActivo;
+  List<String> get historialPenalizaciones => _historialPenalizaciones;
 
   // Carga los competidores desde el servicio de Hive
   void cargarCompetidores() {
@@ -45,6 +50,57 @@ class CompetidorProvider with ChangeNotifier {
 
   void seleccionarCompetidorActivo(Competidor c) {
     _competidorActivo = c;
+    _historialPenalizaciones.clear(); // Reset historial al cambiar competidor
+    notifyListeners();
+  }
+
+  // --- Lógica de Penalizaciones ---
+
+  void agregarToque() async {
+    final c = _competidorActivo;
+    if (c == null) return;
+
+    c.toques++;
+    _historialPenalizaciones.add('toque');
+    await _service.actualizarPenalizaciones(c.dorsal, c.toques, c.postes);
+    notifyListeners();
+  }
+
+  void agregarPoste() async {
+    final c = _competidorActivo;
+    if (c == null) return;
+
+    c.postes++;
+    _historialPenalizaciones.add('poste');
+    await _service.actualizarPenalizaciones(c.dorsal, c.toques, c.postes);
+    notifyListeners();
+  }
+
+  void deshacerUltimaPenalizacion() async {
+    if (_historialPenalizaciones.isEmpty) return;
+
+    final c = _competidorActivo;
+    if (c == null) return;
+
+    final ultima = _historialPenalizaciones.removeLast();
+    if (ultima == 'toque' && c.toques > 0) {
+      c.toques--;
+    } else if (ultima == 'poste' && c.postes > 0) {
+      c.postes--;
+    }
+
+    await _service.actualizarPenalizaciones(c.dorsal, c.toques, c.postes);
+    notifyListeners();
+  }
+
+  void resetPenalizaciones() async {
+    final c = _competidorActivo;
+    if (c == null) return;
+
+    c.toques = 0;
+    c.postes = 0;
+    _historialPenalizaciones.clear();
+    await _service.actualizarPenalizaciones(c.dorsal, c.toques, c.postes);
     notifyListeners();
   }
 }
