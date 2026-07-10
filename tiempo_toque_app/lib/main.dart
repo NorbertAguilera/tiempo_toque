@@ -3,6 +3,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
 import 'models/competidor.dart';
 import 'providers/competidor_provider.dart';
+import 'providers/cronometro_provider.dart';
 import 'screens/lista_competidores_screen.dart';
 
 void main() async {
@@ -11,16 +12,17 @@ void main() async {
   // Inicialización de Hive
   await Hive.initFlutter();
 
-  // Abrir la box de competidores antes de registrar la app
-  await Hive.openBox<Competidor>('competidores');
-
-  // Registro del adapter de Competidor
+  // Registro del adapter de Competidor (DEBE IR ANTES DE ABRIR LA BOX)
   Hive.registerAdapter(CompetidorAdapter());
+
+  // Abrir la box de competidores
+  await Hive.openBox<Competidor>('competidores');
 
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => CompetidorProvider()),
+        ChangeNotifierProvider(create: (_) => CronometroProvider()),
       ],
       child: const MyApp(),
     ),

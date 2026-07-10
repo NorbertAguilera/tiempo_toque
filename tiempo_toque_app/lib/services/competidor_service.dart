@@ -29,4 +29,12 @@ class CompetidorService {
   bool existeDorsal(int dorsal) {
     return _box.containsKey(dorsal);
   }
+
+  Future<void> guardarTiempoBase(int dorsal, double tiempoEnSegundos) async {
+    final competidor = _box.get(dorsal);
+    if (competidor != null) {
+      competidor.tiempoBase = tiempoEnSegundos;
+      await competidor.save();
+    }
+  }
 }

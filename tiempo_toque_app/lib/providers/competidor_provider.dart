@@ -38,6 +38,11 @@ class CompetidorProvider with ChangeNotifier {
     cargarCompetidores();
   }
 
+  void guardarTiempoBase(int dorsal, double tiempo) async {
+    await _service.guardarTiempoBase(dorsal, tiempo);
+    cargarCompetidores();
+  }
+
   void seleccionarCompetidorActivo(Competidor c) {
     _competidorActivo = c;
     notifyListeners();

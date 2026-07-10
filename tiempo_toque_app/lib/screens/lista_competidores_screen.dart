@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/competidor_provider.dart';
 import '../widgets/competidor_tile.dart';
 import 'formulario_competidor_screen.dart';
+import 'cronometro_screen.dart';
 
 class ListaCompetidoresScreen extends StatefulWidget {
   const ListaCompetidoresScreen({super.key});
@@ -81,13 +82,30 @@ class _ListaCompetidoresScreenState extends State<ListaCompetidoresScreen> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => const FormularioCompetidorScreen()),
-        ),
-        child: const Icon(Icons.add),
-        tooltip: 'Agregar Competidor',
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          if (provider.competidorActivo != null)
+            FloatingActionButton.extended(
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const CronometroScreen()),
+              ),
+              label: const Text('Iniciar Cronómetro'),
+              icon: const Icon(Icons.timer),
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              foregroundColor: Theme.of(context).colorScheme.onPrimary,
+            ),
+          const SizedBox(height: 16),
+          FloatingActionButton(
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const FormularioCompetidorScreen()),
+            ),
+            child: const Icon(Icons.add),
+            tooltip: 'Agregar Competidor',
+          ),
+        ],
       ),
     );
   }
