@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'models/competidor.dart';
 import 'providers/competidor_provider.dart';
 import 'providers/cronometro_provider.dart';
+import 'providers/ranking_provider.dart';
 import 'screens/lista_competidores_screen.dart';
 
 void main() async {
@@ -23,6 +24,13 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => CompetidorProvider()),
         ChangeNotifierProvider(create: (_) => CronometroProvider()),
+        ChangeNotifierProxyProvider<CompetidorProvider, RankingProvider>(
+          create: (_) => RankingProvider(),
+          update: (_, compProv, rankingProv) {
+            rankingProv?.updateCompetidorProvider(compProv);
+            return rankingProv ?? RankingProvider()..updateCompetidorProvider(compProv);
+          },
+        ),
       ],
       child: const MyApp(),
     ),

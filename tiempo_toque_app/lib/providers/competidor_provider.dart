@@ -17,35 +17,35 @@ class CompetidorProvider with ChangeNotifier {
   List<String> get historialPenalizaciones => _historialPenalizaciones;
 
   // Carga los competidores desde el servicio de Hive
-  void cargarCompetidores() {
+  Future<void> cargarCompetidores() async {
     _competidores = _service.obtenerCompetidores();
     notifyListeners();
   }
 
-  void agregarCompetidor(Competidor c) async {
+  Future<void> agregarCompetidor(Competidor c) async {
     if (_service.existeDorsal(c.dorsal)) {
       throw Exception('El dorsal ${c.dorsal} ya existe.');
     }
     await _service.crearCompetidor(c);
-    cargarCompetidores();
+    await cargarCompetidores();
   }
 
-  void editarCompetidor(Competidor c) async {
+  Future<void> editarCompetidor(Competidor c) async {
     await _service.actualizarCompetidor(c);
-    cargarCompetidores();
+    await cargarCompetidores();
   }
 
-  void eliminarCompetidor(int dorsal) async {
+  Future<void> eliminarCompetidor(int dorsal) async {
     await _service.eliminarCompetidor(dorsal);
     if (_competidorActivo?.dorsal == dorsal) {
       _competidorActivo = null;
     }
-    cargarCompetidores();
+    await cargarCompetidores();
   }
 
-  void guardarTiempoBase(int dorsal, double tiempo) async {
+  Future<void> guardarTiempoBase(int dorsal, double tiempo) async {
     await _service.guardarTiempoBase(dorsal, tiempo);
-    cargarCompetidores();
+    await cargarCompetidores();
   }
 
   void seleccionarCompetidorActivo(Competidor c) {
@@ -56,7 +56,7 @@ class CompetidorProvider with ChangeNotifier {
 
   // --- Lógica de Penalizaciones ---
 
-  void agregarToque() async {
+  Future<void> agregarToque() async {
     final c = _competidorActivo;
     if (c == null) return;
 
@@ -66,7 +66,7 @@ class CompetidorProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void agregarPoste() async {
+  Future<void> agregarPoste() async {
     final c = _competidorActivo;
     if (c == null) return;
 
@@ -76,7 +76,7 @@ class CompetidorProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void deshacerUltimaPenalizacion() async {
+  Future<void> deshacerUltimaPenalizacion() async {
     if (_historialPenalizaciones.isEmpty) return;
 
     final c = _competidorActivo;
@@ -93,7 +93,7 @@ class CompetidorProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void resetPenalizaciones() async {
+  Future<void> resetPenalizaciones() async {
     final c = _competidorActivo;
     if (c == null) return;
 

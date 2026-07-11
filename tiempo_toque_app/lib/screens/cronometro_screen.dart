@@ -6,8 +6,6 @@ import '../widgets/display_tiempo.dart';
 import '../widgets/boton_penalizacion.dart';
 
 class CronometroScreen extends StatefulWidget {
-
-class CronometroScreen extends StatefulWidget {
   const CronometroScreen({super.key});
 
   @override

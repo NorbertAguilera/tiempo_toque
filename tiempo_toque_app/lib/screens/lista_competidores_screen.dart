@@ -4,6 +4,7 @@ import '../providers/competidor_provider.dart';
 import '../widgets/competidor_tile.dart';
 import 'formulario_competidor_screen.dart';
 import 'cronometro_screen.dart';
+import 'ranking_screen.dart';
 
 class ListaCompetidoresScreen extends StatefulWidget {
   const ListaCompetidoresScreen({super.key});
@@ -37,6 +38,16 @@ class _ListaCompetidoresScreenState extends State<ListaCompetidoresScreen> {
       appBar: AppBar(
         title: const Text('Competidores'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.emoji_events),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const RankingScreen()),
+            ),
+            tooltip: 'Ver Ranking',
+          ),
+        ],
       ),
       body: Column(
         children: [
