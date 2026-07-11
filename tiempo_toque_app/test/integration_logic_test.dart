@@ -1,9 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tiempo_toque_app/models/competidor.dart';
+import 'package:tiempo_toque_app/models/configuracion_penalizaciones.dart';
 import 'package:tiempo_toque_app/providers/competidor_provider.dart';
+import 'package:tiempo_toque_app/providers/configuracion_provider.dart';
 import 'package:tiempo_toque_app/providers/ranking_provider.dart';
 import 'package:tiempo_toque_app/services/competidor_service.dart';
-import 'package:tiempo_toque_app/services/ranking_service.dart';
 
 // Mock simple para evitar dependencias de Hive en tests de integración lógica
 class MockCompetidorService extends CompetidorService {
@@ -46,10 +47,14 @@ void main() {
   test('Flujo Completo: Crear -> Cronometrar -> Penalizar -> Ranking', () async {
     final mockService = MockCompetidorService();
     final compProv = CompetidorProvider(service: mockService);
-    final rankProv = RankingProvider(provider: compProv);
+    final configProv = ConfiguracionProvider(
+      initialConfig: ConfiguracionPenalizaciones(valorToque: 2.0, valorPoste: 50.0),
+    );
+    final rankProv = RankingProvider();
+    rankProv.updateProviders(compProv, configProv);
 
     // 1. Crear dos competidores
-    final c1 = Competidor(dorsal: 1, nombre: ' la rapidez', tiempoBase: null);
+    final c1 = Competidor(dorsal: 1, nombre: 'la rapidez', tiempoBase: null);
     final c2 = Competidor(dorsal: 2, nombre: 'el lento', tiempoBase: null);
 
     await compProv.agregarCompetidor(c1);

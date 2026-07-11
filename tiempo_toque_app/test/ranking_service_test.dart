@@ -20,7 +20,20 @@ void main() {
       );
 
       // 10 + 2 + 50 = 62.0
-      expect(rankingService.calcularTiempoTotal(c), 62.0);
+      expect(rankingService.calcularTiempoTotal(c, 2.0, 50.0), 62.0);
+    });
+
+    test('calcularTiempoTotal calcula correctamente usando otros valores configurados', () {
+      final c = Competidor(
+        dorsal: 1,
+        nombre: 'Test',
+        tiempoBase: 10.0,
+        toques: 1,
+        postes: 1,
+      );
+
+      // 10 + 5 + 10 = 25.0
+      expect(rankingService.calcularTiempoTotal(c, 5.0, 10.0), 25.0);
     });
 
     test('calcularTiempoTotal retorna infinito si tiempoBase es null', () {
@@ -31,7 +44,7 @@ void main() {
         toques: 1,
         postes: 1,
       );
-      expect(rankingService.calcularTiempoTotal(c), double.infinity);
+      expect(rankingService.calcularTiempoTotal(c, 2.0, 50.0), double.infinity);
     });
 
     test('obtenerRanking ordena correctamente de menor a mayor tiempo total', () {
@@ -39,7 +52,7 @@ void main() {
       final c2 = Competidor(dorsal: 2, nombre: 'Rapido', tiempoBase: 10.0, toques: 0, postes: 0);
       final c3 = Competidor(dorsal: 3, nombre: 'Medio', tiempoBase: 30.0, toques: 0, postes: 0);
 
-      final ranking = rankingService.obtenerRanking([c1, c2, c3]);
+      final ranking = rankingService.obtenerRanking([c1, c2, c3], 2.0, 50.0);
 
       expect(ranking[0].dorsal, 2); // El más rápido (10s)
       expect(ranking[1].dorsal, 3); // El medio (30s)
@@ -50,17 +63,22 @@ void main() {
       final c1 = Competidor(dorsal: 1, nombre: 'Corrió', tiempoBase: 10.0, toques: 0, postes: 0);
       final c2 = Competidor(dorsal: 2, nombre: 'Pendiente', tiempoBase: null, toques: 0, postes: 0);
 
-      final ranking = rankingService.obtenerRanking([c1, c2]);
+      final ranking = rankingService.obtenerRanking([c1, c2], 2.0, 50.0);
 
       expect(ranking.length, 1);
       expect(ranking[0].dorsal, 1);
+    });
+
+    test('obtenerRanking maneja correctamente un ranking vacío', () {
+      final ranking = rankingService.obtenerRanking([], 2.0, 50.0);
+      expect(ranking, isEmpty);
     });
 
     test('obtenerRanking mantiene estabilidad en caso de empates exactos', () {
       final c1 = Competidor(dorsal: 1, nombre: 'A', tiempoBase: 10.0, toques: 0, postes: 0);
       final c2 = Competidor(dorsal: 2, nombre: 'B', tiempoBase: 10.0, toques: 0, postes: 0);
 
-      final ranking = rankingService.obtenerRanking([c1, c2]);
+      final ranking = rankingService.obtenerRanking([c1, c2], 2.0, 50.0);
 
       expect(ranking.length, 2);
       expect(ranking[0].tiempoBase, 10.0);

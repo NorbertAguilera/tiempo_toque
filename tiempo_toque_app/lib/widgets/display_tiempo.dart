@@ -12,7 +12,6 @@ class DisplayTiempo extends StatelessWidget {
 
   String _formatDuration(Duration d) {
     String twoDigits(int n) => n.toString().padLeft(2, '0');
-    String twoDecimals(int n) => (n / 100).toStringAsFixed(2).split('.').last.padLeft(2, '0');
 
     final minutes = twoDigits(d.inMinutes.remainder(60));
     final seconds = twoDigits(d.inSeconds.remainder(60));
