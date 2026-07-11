@@ -2,7 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
 import 'models/competidor.dart';
+import 'models/configuracion_penalizaciones.dart';
 import 'providers/competidor_provider.dart';
+import 'providers/cronometro_provider.dart';
+import 'providers/ranking_provider.dart';
+import 'providers/configuracion_provider.dart';
+import 'providers/theme_provider.dart';
+import 'screens/menu_principal_screen.dart';
+import 'theme/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -10,14 +17,29 @@ void main() async {
   // Inicialización de Hive
   await Hive.initFlutter();
 
-  // Registro del adapter de Competidor
-  // Nota: CompetidorAdapter se generará al ejecutar build_runner
+  // Registro de los adapters
   Hive.registerAdapter(CompetidorAdapter());
+  Hive.registerAdapter(ConfiguracionPenalizacionesAdapter());
+
+  // Abrir las boxes
+  await Hive.openBox<Competidor>('competidores');
+  await Hive.openBox<ConfiguracionPenalizaciones>('configuracion');
 
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => CompetidorProvider()),
+        ChangeNotifierProvider(create: (_) => CronometroProvider()),
+        ChangeNotifierProvider(create: (_) => ConfiguracionProvider()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProxyProvider2<CompetidorProvider, ConfiguracionProvider, RankingProvider>(
+          create: (_) => RankingProvider(),
+          update: (_, compProv, configProv, rankProv) {
+            final p = rankProv ?? RankingProvider();
+            p.updateProviders(compProv, configProv);
+            return p;
+          },
+        ),
       ],
       child: const MyApp(),
     ),
@@ -29,33 +51,14 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themeProv = context.watch<ThemeProvider>();
     return MaterialApp(
       title: 'Tiempo & Toque',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: const HomeScreen(),
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: themeProv.isDarkMode ? ThemeMode.dark : ThemeMode.light,
+      home: const MenuPrincipalScreen(),
     );
   }
 }
 
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Tiempo & Toque'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-      ),
-      body: const Center(
-        child: Text(
-          'Tiempo & Toque - Fase 0 lista',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-        ),
-      ),
-    );
-  }
-}

@@ -11,19 +11,23 @@ class Competidor extends HiveObject {
   String nombre;
 
   @HiveField(2)
-  double tiempoBase;
+  String? categoria;
 
   @HiveField(3)
-  int toques;
+  double? tiempoBase;
 
   @HiveField(4)
+  int toques;
+
+  @HiveField(5)
   int postes;
 
   Competidor({
     required this.dorsal,
     required this.nombre,
-    required this.tiempoBase,
-    required this.toques,
-    required this.postes,
+    this.categoria,
+    this.tiempoBase,
+    this.toques = 0,
+    this.postes = 0,
   });
 }
